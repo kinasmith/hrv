@@ -1,9 +1,10 @@
 #include <Arduino.h>
-#include "SparkFun_Si7021_Breakout_Library.h"
-#include <Wire.h>
+#include "DHT.h"
 
 
-Weather th;
+#define DHTPIN 7
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
 
 volatile float R_T,F_T,period;
 float pulseWidth;
@@ -32,7 +33,7 @@ void setup() {
   analogWrite(6, 255*fSpd);
   Serial.begin(9600);
   attachInterrupt(0, rising, RISING); //Interrupt 0 is pin D2
-  th.begin();
+  dht.begin();
 
 }
  
@@ -54,15 +55,10 @@ void loop() {
   }
 
   now = millis();
-  // if(now - fanLast >= fanInterval) {
-  //   fanLast = now;
-  //   fSpd = abs(fSpd-1);
-  //   analogWrite(6, 250*fSpd);
-  // }
   if(now - tempLast >= tempInterval) {
     tempLast = now;
-    float inTemp = th.getTempF();
-    float inHum = th.getRH();
+    float inTemp = dht.readTemperature(true);
+    float inHum = dht.readHumidity();
     // float inTemp = readThermistor(inTemp_pin, inR1);
     float outTemp = readThermistor(therm_pin, R1)+singlePointCal;
     Serial.print(inTemp,2);
